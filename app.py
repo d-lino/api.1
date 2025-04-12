@@ -3,12 +3,14 @@ import sqlite3
 
 app = Flask(__name__)
 
-@app.route("/")
+@app.route("/teste")
 def teste():
     return "<h1>Seja Bem Vindo!</h1>"
 
-with sqlite3.connect("livrosvnw.db") as connection:
-        connection.execute('''
+def init_db():
+
+    with sqlite3.connect("livrosvnw.db") as conn:
+        conn.execute('''
             CREATE TABLE IF NOT EXISTS LIVROS(
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 titulo TEXT NOT NULL,
@@ -21,7 +23,7 @@ with sqlite3.connect("livrosvnw.db") as connection:
 init_db()
 
 @app.route("/doar", methods =["POST"])
-def doar_livros():
+def doar():
 
     dados = request.get_json()
     print(f"AQUI ESTÃO OS DADOS RETORNADOS DO CLIENTE {dados}")
@@ -34,20 +36,20 @@ def doar_livros():
     if not titulo or not categoria or not autor or not image_url:
         return jsonify({"erro": "Todos os campos são obrigatórios"}),400
     
-    with sqlite3.connect("livrosvnw.db") as connection:
-        connection.execute(f'''
+    with sqlite3.connect("livrosvnw.db") as conn:
+        conn.execute(f'''
             INSERT INTO LIVROS (titulo, categoria, autor, image_url)
             VALUES ("{titulo}", "{categoria}", "{autor}", "{image_url}")
         ''')
-        connection.commit()
+        conn.commit()
 
         return jsonify({"mensagem": "Livro cadastrado com sucesso"}), 201
 
 @app.route("/livros", methods =["GET"])
 def listar_livros():
 
-    with sqlite3.connect("livrosvnw.db") as connection:
-        livros = connection.execute("SELECT * FROM LIVROS").fetchall()
+    with sqlite3.connect("livrosvnw.db") as conn:
+        livros = conn.execute("SELECT * FROM LIVROS").fetchall()
 
         livros_formatados = []
 
@@ -66,4 +68,4 @@ def listar_livros():
 
 
 if __name__ == "__main__":
-    app.run(debug=true)
+    app.run(debug=True)
